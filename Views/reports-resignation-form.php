@@ -37,7 +37,7 @@ echo csrf_field();
 
 echo '<div class="form-group">';
 echo '<label class="form-label" for="f-user_id">' . __('user') . '</label>';
-echo '<select id="f-user_id" name="user_id" class="form-control" onchange="rrFillFromUser(this)">';
+echo '<select id="f-user_id" name="user_id" class="form-control" data-on-change="rrFillFromUser" data-args="[&quot;@this&quot;]">';
 echo '<option value="">— ' . __('select') . ' —</option>';
 $selectedUserId = (int) ($report['user_id'] ?? 0);
 foreach ($users as $u) {
@@ -100,7 +100,7 @@ echo '</div></form>';
 
 echo Card::make()->body(ob_get_clean())->render();
 ?>
-<script>
+<script nonce="<?= function_exists('csp_nonce') ? csp_nonce() : '' ?>">
 function rrFillFromUser(select) {
     var opt = select.options[select.selectedIndex];
     document.getElementById('f-employee_number').value = opt.dataset.number || '';
