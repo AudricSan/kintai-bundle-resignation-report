@@ -19,7 +19,7 @@
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-base.css');
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-brand.css');
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-preview.css');
-echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-resignation-report.css');
+echo file_get_contents(bundle_asset_path('resignation-report', 'css/pdf-resignation-report.css') ?? '');
 ?>
 </style>
 </head>

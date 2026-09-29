@@ -212,4 +212,6 @@ echo $tbl
     </div>
 </div>
 
-<script src="<?= $BASE_URL ?>/assets/js/modules/resignation-report-delete-modal.js"></script>
+<?php if ($resignationDeleteJs = bundle_asset('resignation-report', 'js/resignation-report-delete-modal.js')): ?>
+<script src="<?= $resignationDeleteJs ?>"></script>
+<?php endif; ?>
