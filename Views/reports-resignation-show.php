@@ -44,7 +44,7 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
                 <button type="submit" class="btn btn--warning btn--block"><?= __('reactivate_and_delete_report') ?></button>
                 <p class="form-hint"><?= __('reactivate_and_delete_report_hint') ?></p>
             </form>
-            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" onsubmit="return confirm('<?= __('confirm_delete_employee_permanently') ?>')">
+            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" data-confirm="<?= htmlspecialchars(__('confirm_delete_employee_permanently'), ENT_QUOTES) ?>">
                 <?= csrf_field() ?>
                 <button type="submit" class="btn btn--danger btn--block"><?= __('delete_employee_and_report_permanently') ?></button>
                 <p class="form-hint"><?= __('delete_employee_and_report_permanently_hint') ?></p>

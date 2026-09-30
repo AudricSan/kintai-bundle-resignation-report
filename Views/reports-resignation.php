@@ -104,7 +104,7 @@ echo Flash::fromQuery('success', [
             <?php if ($allMode): ?>
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-store"><?= __('store') ?></label>
-                <select id="rf-store" name="store_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                <select id="rf-store" name="store_id" class="form-control form-control-sm" data-submit-on-change>
                     <option value="0"><?= __('all_stores') ?></option>
                     <?php foreach ($stores as $s): ?>
                         <option value="<?= (int) $s['id'] ?>" <?= (int) $s['id'] === $filter_store_id ? 'selected' : '' ?>><?= htmlspecialchars($s['name'] ?? '') ?></option>
@@ -115,7 +115,7 @@ echo Flash::fromQuery('success', [
 
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-year"><?= __('year') ?></label>
-                <select id="rf-year" name="year" class="form-control form-control-sm" onchange="this.form.submit()">
+                <select id="rf-year" name="year" class="form-control form-control-sm" data-submit-on-change>
                     <option value=""><?= __('all_years') ?></option>
                     <?php foreach ($years as $y): ?>
                         <option value="<?= $y ?>" <?= (string) $y === $filter_year ? 'selected' : '' ?>><?= $y ?></option>
@@ -125,7 +125,7 @@ echo Flash::fromQuery('success', [
 
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-month"><?= __('month') ?></label>
-                <select id="rf-month" name="month" class="form-control form-control-sm" onchange="this.form.submit()">
+                <select id="rf-month" name="month" class="form-control form-control-sm" data-submit-on-change>
                     <option value=""><?= __('all_months') ?></option>
                     <?php foreach ($months as $val => $label): ?>
                         <option value="<?= $val ?>" <?= $val === $filter_month ? 'selected' : '' ?>><?= $label ?></option>
@@ -170,7 +170,7 @@ echo $tbl
         $html .= '<a href="' . $baseStore . '/' . $rid . '/edit" class="btn btn--ghost btn--sm">' . __('edit') . '</a>';
         if (!empty($r['user_id'])) {
             $html .= '<form method="POST" action="' . $baseStore . '/' . $rid . '/reactivate" class="form-inline">' . csrf_field()
-                . '<button type="submit" class="btn btn--warning btn--sm" onclick="return confirm(\'' . __('confirm_reactivate') . '\')">' . __('reactivate') . '</button></form>';
+                . '<button type="submit" class="btn btn--warning btn--sm" data-confirm="' . htmlspecialchars(__('confirm_reactivate'), ENT_QUOTES) . '">' . __('reactivate') . '</button></form>';
             $html .= '<button type="button" class="btn btn--danger btn--sm js-rr-delete"'
                 . ' data-reactivate-url="' . htmlspecialchars($baseStore . '/' . $rid . '/delete') . '"'
                 . ' data-delete-url="' . htmlspecialchars($baseStore . '/' . $rid . '/delete-permanently') . '"'
@@ -200,7 +200,7 @@ echo $tbl
                 <button type="submit" class="btn btn--warning btn--block"><?= __('reactivate_and_delete_report') ?></button>
                 <p class="form-hint"><?= __('reactivate_and_delete_report_hint') ?></p>
             </form>
-            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" onsubmit="return confirm('<?= __('confirm_delete_employee_permanently') ?>')">
+            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" data-confirm="<?= htmlspecialchars(__('confirm_delete_employee_permanently'), ENT_QUOTES) ?>">
                 <?= csrf_field() ?>
                 <button type="submit" class="btn btn--danger btn--block"><?= __('delete_employee_and_report_permanently') ?></button>
                 <p class="form-hint"><?= __('delete_employee_and_report_permanently_hint') ?></p>
