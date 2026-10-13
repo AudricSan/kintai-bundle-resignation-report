@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\ResignationReport;
 
-use kintai\Core\BundleContract\Bundle;
+use kintai\Contract\Bundle;
 use kintai\Core\Repositories\ResignationReportRepositoryInterface;
 use kintai\Core\Repositories\DatabaseResignationReportRepository;
 
@@ -23,7 +23,7 @@ final class ResignationReportBundle extends Bundle
 
     public function getVersion(): string
     {
-        return '1.1.0';
+        return '1.2.0';
     }
 
     public function getLabel(): string
