@@ -10,6 +10,7 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ### Changed
 
+- Extraction du Core (étape 4 du plan du contrat) : le bundle possède désormais tout son code et ses données. Le modèle `ResignationReport` et le dépôt `ResignationReportRepositoryInterface` / `DatabaseResignationReportRepository` (`src/Models`, `src/Repositories`) quittent le Core ; la table `resignation_reports` garde son nom et ses données, et une migration du bundle la crée si elle manque (installation neuve). Les libellés de l'entrée de menu, de la catégorie de permissions, du lien « Licencier », du choix du magasin et du message « rapport introuvable » passent dans `lang/`. `ContractUsageTest` n'admet plus aucune classe du Core hors contrat ; `ContractDeclarationsTest` vérifie chaque déclaration valeur par valeur. Nouveau test `ResignationReportsMigrationTest` ; `ResignationReportFilterTest` (filtres du dépôt sur une vraie base) repris du Core.
 - Contrat de bundle versionné : le bundle n'utilise plus que les noms du contrat `kintai\Contract\…` du Core (requête, réponse, routes, middlewares, exceptions, droits, données du Core, services, vues et composants) et déclare `"kintai_contract": "^1.0"` dans `bundle.json` (`kintai_core.min` relevé à `0.3.6`, première version du Core qui fournit le contrat). Nouveau test `ContractUsageTest` : toute utilisation du Core hors contrat échoue, hormis 2 classe(s) propre(s) au bundle qui vivent encore dans le Core (extraction prévue).
 
 ### Added

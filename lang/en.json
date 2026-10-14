@@ -1,5 +1,4 @@
 {
-    "error_resignation_user_not_in_store": "The selected employee is not a member of this store.",
     "all_months": "All months",
     "all_years": "All years",
     "bundle_resignation_report": "Resignation Report",
@@ -12,14 +11,20 @@
     "delete_resignation_report_intro": "What would you like to do for",
     "delete_resignation_report_title": "Delete Resignation Report",
     "edit_resignation_report": "Edit Resignation Report",
+    "error_resignation_report_not_found": "Resignation report not found.",
+    "error_resignation_user_not_in_store": "The selected employee is not a member of this store.",
     "new_resignation_report": "New Resignation Report",
+    "perm_category_resignation_reports": "Resignation Reports",
     "person_in_charge": "Person in Charge",
     "reactivate": "Reactivate",
     "reactivate_and_delete_report": "Reactivate the employee and delete the report",
     "reactivate_and_delete_report_hint": "The employee's account becomes active again; only the report is deleted.",
+    "resign": "Resign",
     "resignation_date": "Resignation Date",
     "resignation_notice": "Resignation Notice",
+    "resignation_report": "Resignation Report",
     "resignation_report_pdf_title": "Resignation Report (退職報告書)",
     "resignation_reports": "Resignation Reports",
+    "store_picker_choose": "Choose a store",
     "user_deleted_permanently": "The employee and the report have been permanently deleted."
 }

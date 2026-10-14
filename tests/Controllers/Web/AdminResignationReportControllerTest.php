@@ -14,7 +14,7 @@ use kintai\Core\Auth\PermissionService;
 use kintai\Core\Container;
 use kintai\Core\Exceptions\NotFoundException;
 use kintai\Core\Repositories\LogRepositoryInterface;
-use kintai\Core\Repositories\ResignationReportRepositoryInterface;
+use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
 use kintai\Core\Repositories\RoleAssignmentRepositoryInterface;
 use kintai\Core\Repositories\RoleRepositoryInterface;
 use kintai\Core\Repositories\StoreRepositoryInterface;

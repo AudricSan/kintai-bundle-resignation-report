@@ -1,5 +1,4 @@
 {
-    "error_resignation_user_not_in_store": "L’employé choisi n’est pas membre de ce magasin.",
     "all_months": "Tous les mois",
     "all_years": "Toutes les années",
     "bundle_resignation_report": "Rapport de démission",
@@ -12,14 +11,20 @@
     "delete_resignation_report_intro": "Que souhaitez-vous faire pour",
     "delete_resignation_report_title": "Supprimer le rapport de démission",
     "edit_resignation_report": "Modifier le rapport de démission",
+    "error_resignation_report_not_found": "Rapport de démission introuvable.",
+    "error_resignation_user_not_in_store": "L’employé choisi n’est pas membre de ce magasin.",
     "new_resignation_report": "Nouveau rapport de démission",
+    "perm_category_resignation_reports": "Rapports de démission",
     "person_in_charge": "Responsable",
     "reactivate": "Réactiver",
     "reactivate_and_delete_report": "Réactiver l'employé et supprimer le rapport",
     "reactivate_and_delete_report_hint": "L'employé retrouve son compte actif ; seul le rapport est supprimé.",
+    "resign": "Licencier",
     "resignation_date": "Date de démission",
     "resignation_notice": "Préavis de démission",
+    "resignation_report": "Rapport de démission",
     "resignation_report_pdf_title": "Rapport de démission (退職報告書)",
     "resignation_reports": "Rapports de démission",
+    "store_picker_choose": "Choisir un magasin",
     "user_deleted_permanently": "L'employé et le rapport ont été supprimés définitivement."
 }
