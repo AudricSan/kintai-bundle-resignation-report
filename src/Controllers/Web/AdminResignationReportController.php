@@ -7,7 +7,7 @@ namespace kintai\Bundles\Installed\ResignationReport\Controllers\Web;
 use kintai\Contract\Auth\PermissionService;
 use kintai\Contract\Exceptions\ForbiddenException;
 use kintai\Contract\Exceptions\ValidationException;
-use kintai\Core\Repositories\ResignationReportRepositoryInterface;
+use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
 use kintai\Contract\Data\StoreRepositoryInterface;
 use kintai\Contract\Data\StoreUserRepositoryInterface;
 use kintai\Contract\Data\UserRepositoryInterface;

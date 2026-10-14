@@ -7,14 +7,13 @@ namespace kintai\Bundles\Installed\ResignationReport;
 use kintai\Contract\Bundle;
 use kintai\Contract\Extension\Action;
 use kintai\Contract\Extension\NavItem;
-use kintai\Core\Repositories\DatabaseResignationReportRepository;
-use kintai\Core\Repositories\ResignationReportRepositoryInterface;
+use kintai\Bundles\Installed\ResignationReport\Repositories\DatabaseResignationReportRepository;
+use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
 
 /**
- * Comme ShiftClaim/StorePhoto, aucun autre composant Core ne dépend de
- * ResignationReportRepositoryInterface : le repository est enregistré par ce
- * bundle, pas par le Core. Désactiver ou désinstaller "resignation-report"
- * retire entièrement la fonctionnalité.
+ * Le bundle possède son modèle, son dépôt et sa table (resignation_reports) ; aucun composant du Core n'en dépend.
+ * Désactiver ou désinstaller « resignation-report » retire entièrement la fonctionnalité (la table et ses données
+ * restent).
  */
 final class ResignationReportBundle extends Bundle
 {
