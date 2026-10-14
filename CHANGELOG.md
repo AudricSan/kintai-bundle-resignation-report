@@ -8,6 +8,10 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Added
+
+- Socle de tests PHPUnit (composer.json, phpunit.xml) et CI qui l'exécute contre le vrai Core : les tests que le Core faisait tourner sur une copie figée du bundle (fixtures 1.0.0) vivent désormais ici et testent le code réel.
+
 ### Fixed
 
 - Sécurité — la création d'un rapport de démission désactivait le compte `user_id` posté sans le contrôler, et « Supprimer définitivement » le supprimait : un gérant pouvait ainsi désactiver puis supprimer n'importe quel compte (autre magasin, Owner). Le compte doit maintenant être membre du magasin du rapport, un Owner n'est modifiable que par un Owner, et la suppression définitive exige de gérer tous les magasins du compte.
