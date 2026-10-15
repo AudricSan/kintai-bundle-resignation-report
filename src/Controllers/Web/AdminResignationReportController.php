@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace kintai\Bundles\Installed\ResignationReport\Controllers\Web;
 
 use kintai\Contract\Auth\PermissionService;
+use kintai\Contract\Auth\UserAnonymizer;
 use kintai\Contract\Exceptions\ForbiddenException;
 use kintai\Contract\Exceptions\ValidationException;
 use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
@@ -49,6 +50,8 @@ final class AdminResignationReportController
         private readonly AuditLogger $auditLogger,
         private readonly PermissionService $permissions,
         private readonly ResignationDeactivation $deactivation,
+        // Résolu par le conteneur (contrat 1.21) ; facultatif pour les tests qui ne suppriment aucun compte.
+        private readonly ?UserAnonymizer $anonymizer = null,
     ) {}
 
     public function allResignationReports(Request $request): Response
@@ -338,7 +341,9 @@ final class AdminResignationReportController
         ]);
 
         if ($userId > 0) {
-            $this->users->delete($userId);
+            // Supprimer un compte, c'est l'anonymiser (comme la fiche employé et l'API) : avant, une suppression douce
+            // laissait nom, e-mail, téléphone et adresse en base.
+            ($this->anonymizer ?? throw new \LogicException('UserAnonymizer requis.'))->anonymize($userId);
             $this->auditLogger->log($request, 'user.deleted', 'user', $userId, [
                 'reason'   => 'resignation_report_deleted',
                 'store_id' => $storeId,
