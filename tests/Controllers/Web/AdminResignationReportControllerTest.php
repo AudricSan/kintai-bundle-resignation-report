@@ -10,6 +10,7 @@ if (!defined('BASE_PATH')) {
 
 
 use kintai\Bundles\Installed\ResignationReport\Controllers\Web\AdminResignationReportController;
+use kintai\Bundles\Installed\ResignationReport\Services\ResignationDeactivation;
 use kintai\Core\Auth\PermissionService;
 use kintai\Core\Container;
 use kintai\Core\Exceptions\NotFoundException;
@@ -71,6 +72,7 @@ final class AdminResignationReportControllerTest extends TestCase
             $this->storeUsers,
             new AuditLogger(),
             new PermissionService($this->assignments, $this->roles),
+            new ResignationDeactivation($this->resignationReports, $this->users),
         );
     }
 
@@ -457,7 +459,8 @@ final class AdminResignationReportControllerTest extends TestCase
         $req->setAttribute('managed_store_ids', null);
         $req->setRouteParams(['id' => '1', 'rid' => '10']);
 
-        $this->resignationReports->method('findById')->with(10)->willReturn(['id' => 10, 'store_id' => 1, 'user_id' => 5]);
+        // Rapport appliqué (deactivated_at renseigné) : sa suppression rend l'accès.
+        $this->resignationReports->method('findById')->with(10)->willReturn(['id' => 10, 'store_id' => 1, 'user_id' => 5, 'deactivated_at' => '2026-08-01 09:00:00']);
         $this->resignationReports->expects($this->once())->method('delete')->with(10);
         $this->users->method('findById')->with(5)->willReturn(['id' => 5, 'is_active' => 0]);
 
@@ -549,5 +552,98 @@ final class AdminResignationReportControllerTest extends TestCase
             mkdir($parent, 0777, true);
         }
         touch($file);
+    }
+
+    // -------------------------------------------------------------------------
+    // Audit n°8 (D2) : désactivation à la date de démission, jamais sur soi ni sur un autre gérant
+    // -------------------------------------------------------------------------
+
+    private function storeRequest(int $callerId, string $date, int $userId = 5): Request
+    {
+        $_POST = ['employee_name' => 'Alice', 'resignation_date' => $date, 'user_id' => (string) $userId];
+        $req = new Request();
+        $req->setAttribute('managed_store_ids', [1]);
+        $req->setAttribute('auth_user', ['id' => $callerId]);
+        $req->setRouteParams(['id' => '1']);
+        $this->stores->method('findById')->with(1)->willReturn(['id' => 1]);
+        $this->storeUsers->method('findMembership')->willReturn(['id' => 3]);
+        return $req;
+    }
+
+    public function testAFutureResignationDateDoesNotDeactivateTheAccountYet(): void
+    {
+        $req = $this->storeRequest(2, date('Y-m-d', strtotime('+20 days')));
+        $this->resignationReports->expects($this->once())->method('save')->willReturnCallback(fn(array $d) => $d + ['id' => 99]);
+        $this->users->expects($this->never())->method('save');
+
+        $this->assertSame(302, $this->controller->storeResignationReport($req)->status());
+    }
+
+    public function testTodaysResignationDeactivatesNowAndMarksTheReport(): void
+    {
+        $req = $this->storeRequest(2, date('Y-m-d'));
+        $saved = [];
+        $this->resignationReports->method('save')->willReturnCallback(function (array $d) use (&$saved) {
+            $saved[] = $d;
+            return $d + ['id' => 99];
+        });
+        $this->users->method('findById')->with(5)->willReturn(['id' => 5, 'is_active' => 1]);
+        $this->users->expects($this->once())->method('save')->with($this->callback(fn(array $u) => $u['is_active'] === 0));
+
+        $this->controller->storeResignationReport($req);
+
+        $this->assertNotEmpty($saved[1]['deactivated_at'] ?? null, 'rapport marqué appliqué');
+    }
+
+    public function testAManagerCannotFileTheirOwnResignation(): void
+    {
+        $req = $this->storeRequest(5, date('Y-m-d'));
+        $this->resignationReports->expects($this->never())->method('save');
+        $this->users->expects($this->never())->method('save');
+
+        $this->expectException(\kintai\Core\Exceptions\ForbiddenException::class);
+        $this->controller->storeResignationReport($req);
+    }
+
+    public function testAManagerCannotFileAnotherManagersResignation(): void
+    {
+        $req = $this->storeRequest(2, date('Y-m-d'));
+        $this->assignments->method('findByScope')->willReturn([]);
+        $this->assignments->method('findByUser')->willReturnCallback(fn(int $u) => $u === 5
+            ? [['id' => 4, 'user_id' => 5, 'role_id' => 2, 'scope_type' => 'store', 'scope_id' => 1]]
+            : []);
+        $this->roles->method('findById')->willReturn(['id' => 2, 'is_system' => 0]);
+        $this->roles->method('getPermissions')->willReturn(['shifts.view']);
+        $this->resignationReports->expects($this->never())->method('save');
+
+        $this->expectException(\kintai\Core\Exceptions\ForbiddenException::class);
+        $this->controller->storeResignationReport($req);
+    }
+
+    public function testAnOwnerCanFileAManagersResignation(): void
+    {
+        $req = $this->storeRequest(7, date('Y-m-d', strtotime('+3 days')));
+        $this->assignments->method('findByScope')->willReturn([
+            ['id' => 1, 'user_id' => 7, 'role_id' => 10, 'scope_type' => 'global', 'scope_id' => null],
+        ]);
+        $this->assignments->method('findByUser')->willReturn([
+            ['id' => 4, 'user_id' => 5, 'role_id' => 2, 'scope_type' => 'store', 'scope_id' => 1],
+        ]);
+        $this->roles->method('findById')->willReturnCallback(fn(int $id) => ['id' => $id, 'is_system' => $id === 10 ? 1 : 0]);
+        $this->roles->method('getPermissions')->willReturn(['shifts.view']);
+        $this->resignationReports->expects($this->once())->method('save')->willReturnCallback(fn(array $d) => $d + ['id' => 99]);
+
+        $this->assertSame(302, $this->controller->storeResignationReport($req)->status());
+    }
+
+    public function testDeletingAReportNotYetAppliedLeavesTheAccountAlone(): void
+    {
+        $req = new Request();
+        $req->setAttribute('managed_store_ids', null);
+        $req->setRouteParams(['id' => '1', 'rid' => '10']);
+        $this->resignationReports->method('findById')->with(10)->willReturn(['id' => 10, 'store_id' => 1, 'user_id' => 5, 'deactivated_at' => null]);
+        $this->users->expects($this->never())->method('save');
+
+        $this->controller->deleteResignationReport($req);
     }
 }

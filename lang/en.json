@@ -1,4 +1,8 @@
 {
+    "cron_job_resignation_deactivate": "Deactivate accounts on their resignation date",
+    "error_resignation_self": "You cannot create a resignation report for yourself.",
+    "error_resignation_manager": "This account manages a store: only an Owner can record their resignation.",
+    "resignation_deactivation_hint": "The employee's account will be deactivated on this date (immediately if it is today or in the past).",
     "all_months": "All months",
     "all_years": "All years",
     "bundle_resignation_report": "Resignation Report",

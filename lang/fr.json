@@ -1,4 +1,8 @@
 {
+    "cron_job_resignation_deactivate": "Désactivation des comptes à la date de démission",
+    "error_resignation_self": "Vous ne pouvez pas créer un rapport de démission à votre propre nom.",
+    "error_resignation_manager": "Ce compte gère un magasin : seul un Owner peut enregistrer sa démission.",
+    "resignation_deactivation_hint": "Le compte de l'employé sera désactivé à cette date (tout de suite si elle est aujourd'hui ou passée).",
     "all_months": "Tous les mois",
     "all_years": "Toutes les années",
     "bundle_resignation_report": "Rapport de démission",

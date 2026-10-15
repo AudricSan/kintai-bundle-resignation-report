@@ -64,6 +64,7 @@ echo '</div>';
 echo '<div class="form-group">';
 echo '<label class="form-label" for="f-resignation_date">' . __('resignation_date') . '</label>';
 echo '<input id="f-resignation_date" type="date" name="resignation_date" class="form-control" value="' . htmlspecialchars($report['resignation_date'] ?? '') . '">';
+echo '<p class="form-hint">' . __('resignation_deactivation_hint') . '</p>';
 echo '</div>';
 
 echo '<div class="form-group">';

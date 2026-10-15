@@ -67,6 +67,11 @@ final class ContractDeclarationsTest extends TestCase
         $this->assertSame(10, $store->order);
     }
 
+    public function testCronJobs(): void
+    {
+        $this->assertSame([\kintai\Bundles\Installed\ResignationReport\Cron\ResignationDeactivateJob::class], $this->bundle()->cronJobs());
+    }
+
     /** Le bundle n'apporte rien d'autre au Core. */
     public function testNoOtherContribution(): void
     {
@@ -77,7 +82,6 @@ final class ContractDeclarationsTest extends TestCase
         $this->assertSame([], $bundle->viewVariables());
         $this->assertSame([], $bundle->profileSections());
         $this->assertSame([], $bundle->notificationTypes());
-        $this->assertSame([], $bundle->cronJobs());
         $this->assertSame([], $bundle->pendingRequestsProviders());
         $this->assertSame([], $bundle->absenceProviders());
         $this->assertSame([], $bundle->attendanceProviders());
@@ -86,7 +90,8 @@ final class ContractDeclarationsTest extends TestCase
     /** Libellés des déclarations, fournis par le bundle. */
     public function testDeclaredLabelsAreTranslatedByTheBundle(): void
     {
-        $keys = ['resignation_report', 'perm_category_resignation_reports', 'resign', 'error_resignation_report_not_found', 'store_picker_choose'];
+        $keys = ['resignation_report', 'perm_category_resignation_reports', 'resign', 'error_resignation_report_not_found', 'store_picker_choose',
+            'cron_job_resignation_deactivate', 'error_resignation_self', 'error_resignation_manager', 'resignation_deactivation_hint'];
         foreach (['fr', 'en', 'ja'] as $locale) {
             $lang = json_decode((string) file_get_contents(dirname(__DIR__) . "/lang/{$locale}.json"), true);
             foreach ($keys as $key) {
