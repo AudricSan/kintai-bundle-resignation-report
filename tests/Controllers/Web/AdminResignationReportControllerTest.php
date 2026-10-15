@@ -73,6 +73,15 @@ final class AdminResignationReportControllerTest extends TestCase
             new AuditLogger(),
             new PermissionService($this->assignments, $this->roles),
             new ResignationDeactivation($this->resignationReports, $this->users),
+            new \kintai\Core\Auth\UserAnonymizer(
+                $this->users,
+                $this->assignments,
+                new \kintai\Core\Auth\CredentialRevoker(
+                    $this->createStub(\kintai\Core\Repositories\RememberTokenRepositoryInterface::class),
+                    $this->createStub(\kintai\Core\Repositories\ApiTokenRepositoryInterface::class),
+                ),
+                sys_get_temp_dir(),
+            ),
         );
     }
 
@@ -491,7 +500,8 @@ final class AdminResignationReportControllerTest extends TestCase
         $this->assertSame(302, $response->status());
     }
 
-    public function testDeleteResignationReportPermanentlyDeletesReportAndUser(): void
+    /** Audit n°8 : le compte est anonymisé (contrat 1.21), plus seulement supprimé en douceur avec ses données. */
+    public function testDeleteResignationReportPermanentlyDeletesReportAndAnonymizesUser(): void
     {
         $req = new Request();
         $req->setAttribute('managed_store_ids', null);
@@ -499,8 +509,11 @@ final class AdminResignationReportControllerTest extends TestCase
 
         $this->resignationReports->method('findById')->with(10)->willReturn(['id' => 10, 'store_id' => 1, 'user_id' => 5]);
         $this->resignationReports->expects($this->once())->method('delete')->with(10);
-        $this->users->expects($this->once())->method('delete')->with(5);
-        $this->users->expects($this->never())->method('save');
+        $this->users->method('findById')->with(5)->willReturn(['id' => 5, 'email' => 'alice@example.test', 'phone' => '0600000000']);
+        $this->users->expects($this->never())->method('delete');
+        $this->users->expects($this->once())->method('save')->with($this->callback(
+            fn(array $u) => $u['id'] === 5 && $u['email'] === 'deleted-5@kintai.local' && $u['phone'] === null && $u['is_active'] === 0
+        ));
 
         $response = $this->controller->deleteResignationReportPermanently($req);
 
