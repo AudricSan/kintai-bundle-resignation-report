@@ -8,6 +8,16 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Changed
+
+- Extraction du Core (étape 4 du plan du contrat) : le bundle possède désormais tout son code et ses données. Le modèle `ResignationReport` et le dépôt `ResignationReportRepositoryInterface` / `DatabaseResignationReportRepository` (`src/Models`, `src/Repositories`) quittent le Core ; la table `resignation_reports` garde son nom et ses données, et une migration du bundle la crée si elle manque (installation neuve). Les libellés de l'entrée de menu, de la catégorie de permissions, du lien « Licencier », du choix du magasin et du message « rapport introuvable » passent dans `lang/`. `ContractUsageTest` n'admet plus aucune classe du Core hors contrat ; `ContractDeclarationsTest` vérifie chaque déclaration valeur par valeur. Nouveau test `ResignationReportsMigrationTest` ; `ResignationReportFilterTest` (filtres du dépôt sur une vraie base) repris du Core.
+- Contrat de bundle versionné : le bundle n'utilise plus que les noms du contrat `kintai\Contract\…` du Core (requête, réponse, routes, middlewares, exceptions, droits, données du Core, services, vues et composants) et déclare `"kintai_contract": "^1.0"` dans `bundle.json` (`kintai_core.min` relevé à `0.3.6`, première version du Core qui fournit le contrat). Nouveau test `ContractUsageTest` : toute utilisation du Core hors contrat échoue, hormis 2 classe(s) propre(s) au bundle qui vivent encore dans le Core (extraction prévue).
+
+### Added
+
+- Contrat de bundle 1.11 : le bundle déclare lui-même ce qu'il apporte au Core (`navigation()`, `permissions()`, `actions()`) au lieu que le Core le connaisse à l'avance ; déclarations identiques à ce que le Core affichait pour ce bundle, rien ne change à l'écran. `bundle.json` demande désormais `"kintai_contract": "^1.11"` (Kintai Core avec les points d'extension et fournisseurs du contrat). Nouveau test `ContractDeclarationsTest` : chaque déclaration est comparée au repli historique du Core.
+- Socle de tests PHPUnit (composer.json, phpunit.xml) et CI qui l'exécute contre le vrai Core : les tests que le Core faisait tourner sur une copie figée du bundle (fixtures 1.0.0) vivent désormais ici et testent le code réel.
+
 ### Fixed
 
 - Sécurité — la création d'un rapport de démission désactivait le compte `user_id` posté sans le contrôler, et « Supprimer définitivement » le supprimait : un gérant pouvait ainsi désactiver puis supprimer n'importe quel compte (autre magasin, Owner). Le compte doit maintenant être membre du magasin du rapport, un Owner n'est modifiable que par un Owner, et la suppression définitive exige de gérer tous les magasins du compte.
