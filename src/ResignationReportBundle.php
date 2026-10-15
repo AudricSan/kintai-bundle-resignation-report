@@ -7,6 +7,7 @@ namespace kintai\Bundles\Installed\ResignationReport;
 use kintai\Contract\Bundle;
 use kintai\Contract\Extension\Action;
 use kintai\Contract\Extension\NavItem;
+use kintai\Bundles\Installed\ResignationReport\Cron\ResignationDeactivateJob;
 use kintai\Bundles\Installed\ResignationReport\Repositories\DatabaseResignationReportRepository;
 use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
 
@@ -85,5 +86,13 @@ final class ResignationReportBundle extends Bundle
             new Action('resign', Action::EMPLOYEE_ROW, 'resign', $resign, '✕', Action::DANGER, 'resignation_reports.create', order: 20),
             new Action('resign', Action::EMPLOYEE_STORE, 'resign', $resign, '', Action::DANGER, 'resignation_reports.create', order: 10),
         ];
+    }
+
+    /**
+     * Tâche planifiée (contrat 1.8) : désactive chaque jour les comptes dont la date de démission est atteinte.
+     */
+    public function cronJobs(): array
+    {
+        return [ResignationDeactivateJob::class];
     }
 }

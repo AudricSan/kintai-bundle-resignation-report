@@ -38,10 +38,10 @@ final class ResignationReportsMigrationTest extends TestCase
     {
         [$runner, $capsule] = $this->freshRunner();
 
-        $this->assertSame(['2026_10_14_000001_create_resignation_reports_table'], $runner->runPendingFor('resignation-report', $this->migrationsPath()));
+        $this->assertSame(['2026_10_14_000001_create_resignation_reports_table', '2026_10_15_000001_add_deactivated_at_to_resignation_reports'], $runner->runPendingFor('resignation-report', $this->migrationsPath()));
 
         $schema = $capsule->getConnection()->getSchemaBuilder();
-        foreach (['id', 'store_id', 'user_id', 'employee_number', 'employee_name', 'resignation_date', 'reason', 'resignation_notice', 'notes', 'person_in_charge', 'created_by', 'created_at', 'updated_at'] as $column) {
+        foreach (['id', 'store_id', 'user_id', 'employee_number', 'employee_name', 'resignation_date', 'reason', 'resignation_notice', 'notes', 'person_in_charge', 'created_by', 'created_at', 'updated_at', 'deactivated_at'] as $column) {
             $this->assertTrue($schema->hasColumn('resignation_reports', $column), "resignation_reports.{$column}");
         }
 

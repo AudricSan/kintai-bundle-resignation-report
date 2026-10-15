@@ -55,6 +55,16 @@ final class DatabaseResignationReportRepository implements ResignationReportRepo
         return $r->toArray();
     }
 
+    public function findDueForDeactivation(string $today): array
+    {
+        return EloquentResignationReport::whereNotNull('user_id')
+            ->whereNull('deactivated_at')
+            ->where(fn($q) => $q->whereNull('resignation_date')->orWhere('resignation_date', '<=', $today))
+            ->orderBy('id')
+            ->get()
+            ->toArray();
+    }
+
     public function delete(int $id): int
     {
         $r = EloquentResignationReport::find($id);
