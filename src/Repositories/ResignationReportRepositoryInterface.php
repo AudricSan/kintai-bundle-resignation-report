@@ -11,4 +11,12 @@ interface ResignationReportRepositoryInterface
     public function findAll(?array $storeIds = null, array $filters = []): array;
     public function save(array $data): array;
     public function delete(int $id): int;
+
+    /**
+     * Rapports rattachés à un compte, pas encore appliqués (deactivated_at nul) et dont la date de démission est
+     * atteinte (ou absente).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function findDueForDeactivation(string $today): array;
 }

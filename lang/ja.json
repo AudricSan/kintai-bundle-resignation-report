@@ -1,4 +1,8 @@
 {
+    "cron_job_resignation_deactivate": "退職日にアカウントを無効化",
+    "error_resignation_self": "自分自身の退職報告は作成できません。",
+    "error_resignation_manager": "このアカウントは店舗を管理しています。退職の登録はオーナーのみ可能です。",
+    "resignation_deactivation_hint": "従業員のアカウントはこの日に無効化されます（今日または過去の日付の場合はすぐに無効化）。",
     "all_months": "全月",
     "all_years": "全年度",
     "bundle_resignation_report": "退職報告書",
