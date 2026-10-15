@@ -21,6 +21,7 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ### Fixed
 
+- « Supprimer définitivement » (rapport et compte) anonymise désormais le compte, comme la fiche employé et l'API (données personnelles effacées, compte désactivé, droits et jetons retirés, historique conservé sous « Utilisateur supprimé ») : avant, une suppression douce laissait nom, e-mail, téléphone et adresse en base. Utilise `kintai\Contract\Auth\UserAnonymizer` : **nécessite le contrat 1.21** (`"kintai_contract": "^1.21"`).
 - Sécurité — la création d'un rapport de démission désactivait le compte `user_id` posté sans le contrôler, et « Supprimer définitivement » le supprimait : un gérant pouvait ainsi désactiver puis supprimer n'importe quel compte (autre magasin, Owner). Le compte doit maintenant être membre du magasin du rapport, un Owner n'est modifiable que par un Owner, et la suppression définitive exige de gérer tous les magasins du compte.
 
 ### Changed
