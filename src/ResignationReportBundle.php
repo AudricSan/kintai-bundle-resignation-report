@@ -83,8 +83,8 @@ final class ResignationReportBundle extends Bundle
         $resign = static fn(array $c): string => base_url() . '/admin/stores/' . (int) $c['store_id'] . '/reports/resignation/create?user_id=' . (int) $c['user_id'];
 
         return [
-            new Action('resign', Action::EMPLOYEE_ROW, 'resign', $resign, '✕', Action::DANGER, 'resignation_reports.create', order: 20),
-            new Action('resign', Action::EMPLOYEE_STORE, 'resign', $resign, '', Action::DANGER, 'resignation_reports.create', order: 10),
+            new Action('resign', Action::EMPLOYEE_ROW, 'resignation_report_resign', $resign, '✕', Action::DANGER, 'resignation_reports.create', order: 20),
+            new Action('resign', Action::EMPLOYEE_STORE, 'resignation_report_resign', $resign, '', Action::DANGER, 'resignation_reports.create', order: 10),
         ];
     }
 

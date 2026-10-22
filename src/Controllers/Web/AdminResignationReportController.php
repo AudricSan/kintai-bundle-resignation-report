@@ -29,7 +29,7 @@ final class AdminResignationReportController
         'entity'    => 'resignation_report',
         'slug'      => 'resignation',
         'view'      => 'resignation-report::reports-resignation',
-        'not_found' => 'error_resignation_report_not_found',
+        'not_found' => 'resignation_report_error_not_found',
         'fields'    => [
             'employee_number'    => 'str',
             'employee_name'      => 'str',
@@ -79,7 +79,7 @@ final class AdminResignationReportController
         $reports = $this->resignationReports->findAll($queryStoreIds, $filters);
 
         return Response::html($this->view->render('resignation-report::reports-resignation', [
-            'title'          => __('resignation_reports'),
+            'title'          => __('resignation_report_resignation_reports'),
             'stores'         => $allStores,
             'filter_store_id' => $filterStoreId,
             'filter_year'    => $filterYear,
@@ -91,7 +91,7 @@ final class AdminResignationReportController
 
     public function resignationReports(Request $request): Response
     {
-        return $this->listReports($request, __('resignation_reports'));
+        return $this->listReports($request, __('resignation_report_resignation_reports'));
     }
 
     // -------------------------------------------------------------------------
@@ -210,7 +210,7 @@ final class AdminResignationReportController
         $managers = $this->getManagersForReportForm($storeId, $userId);
 
         return Response::html($this->view->render('resignation-report::reports-resignation-form', [
-            'title'   => __('new_resignation_report') . ' — ' . ($store['name'] ?? ''),
+            'title'   => __('resignation_report_new_resignation_report') . ' — ' . ($store['name'] ?? ''),
             'store'   => $store,
             'users'   => $users,
             'mode'    => 'create',
@@ -230,7 +230,7 @@ final class AdminResignationReportController
             // La création désactive le compte ciblé : il doit appartenir à CE magasin et ne
             // pas être un Owner, sinon un gérant pouvait désactiver (puis supprimer) n'importe quel compte.
             if ($this->storeUsers->findMembership($storeId, $userId) === null) {
-                throw new ValidationException(['user_id' => __('error_resignation_user_not_in_store')]);
+                throw new ValidationException(['user_id' => __('resignation_report_error_resignation_user_not_in_store')]);
             }
             $this->assertNotOwnerAccount($request, $userId);
             $this->assertNotSelfOrOtherManager($request, $storeId, $userId);
@@ -371,14 +371,14 @@ final class AdminResignationReportController
     {
         $callerId = (int) ($request->getAttribute('auth_user')['id'] ?? 0);
         if ($userId === $callerId) {
-            throw new ForbiddenException(__('error_resignation_self'));
+            throw new ForbiddenException(__('resignation_report_error_resignation_self'));
         }
         if (in_array($callerId, $this->permissions->ownerUserIds(), true)) {
             return;
         }
         $target = ['id' => $userId];
         if ($this->permissions->anyGrantedStoreIds($target) !== [] || $this->permissions->hasAnyGlobalPermissionGrant($target)) {
-            throw new ForbiddenException(__('error_resignation_manager'));
+            throw new ForbiddenException(__('resignation_report_error_resignation_manager'));
         }
     }
 
@@ -449,7 +449,7 @@ final class AdminResignationReportController
 
     protected function reportEditTitle(): string
     {
-        return __('edit_resignation_report');
+        return __('resignation_report_edit_resignation_report');
     }
 
     protected function reportEditExtras(int $storeId, array $report): array
