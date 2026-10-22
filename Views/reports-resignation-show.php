@@ -22,7 +22,7 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
             data-delete-url="<?= htmlspecialchars($base . '/' . $reportId . '/delete-permanently') ?>"
             data-employee-name="<?= htmlspecialchars($report['employee_name'] ?? '') ?>"><?= __('delete') ?></button>
         <?php else: ?>
-        <form method="POST" action="<?= $base . '/' . $reportId . '/delete' ?>" class="form-inline" data-confirm="<?= htmlspecialchars(__('confirm_delete_resignation_report'), ENT_QUOTES) ?>">
+        <form method="POST" action="<?= $base . '/' . $reportId . '/delete' ?>" class="form-inline" data-confirm="<?= htmlspecialchars(__('resignation_report_confirm_delete_resignation_report'), ENT_QUOTES) ?>">
             <?= csrf_field() ?>
             <?= Button::make(__('delete'))->danger()->sm()->submit()->render() ?>
         </form>
@@ -34,20 +34,20 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
     <div class="modal__backdrop js-rr-delete-close"></div>
     <div class="modal__dialog">
         <div class="modal__header">
-            <h3 class="modal__title"><?= __('delete_resignation_report_title') ?></h3>
+            <h3 class="modal__title"><?= __('resignation_report_delete_title') ?></h3>
             <button type="button" class="modal__close js-rr-delete-close">✕</button>
         </div>
         <div class="modal__body">
-            <p><?= __('delete_resignation_report_intro') ?> <strong id="rr-delete-employee-name"></strong></p>
+            <p><?= __('resignation_report_delete_intro') ?> <strong id="rr-delete-employee-name"></strong></p>
             <form id="rr-reactivate-form" method="POST" action="">
                 <?= csrf_field() ?>
-                <button type="submit" class="btn btn--warning btn--block"><?= __('reactivate_and_delete_report') ?></button>
-                <p class="form-hint"><?= __('reactivate_and_delete_report_hint') ?></p>
+                <button type="submit" class="btn btn--warning btn--block"><?= __('resignation_report_reactivate_and_delete_report') ?></button>
+                <p class="form-hint"><?= __('resignation_report_reactivate_and_delete_report_hint') ?></p>
             </form>
-            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" data-confirm="<?= htmlspecialchars(__('confirm_delete_employee_permanently'), ENT_QUOTES) ?>">
+            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" data-confirm="<?= htmlspecialchars(__('resignation_report_confirm_delete_employee_permanently'), ENT_QUOTES) ?>">
                 <?= csrf_field() ?>
-                <button type="submit" class="btn btn--danger btn--block"><?= __('delete_employee_and_report_permanently') ?></button>
-                <p class="form-hint"><?= __('delete_employee_and_report_permanently_hint') ?></p>
+                <button type="submit" class="btn btn--danger btn--block"><?= __('resignation_report_delete_employee_and_report_permanently') ?></button>
+                <p class="form-hint"><?= __('resignation_report_delete_employee_and_report_permanently_hint') ?></p>
             </form>
         </div>
         <div class="modal__footer">
@@ -72,7 +72,7 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
                 <td><?= htmlspecialchars($report['employee_name'] ?? '—') ?></td>
             </tr>
             <tr>
-                <th><?= __('resignation_date') ?></th>
+                <th><?= __('resignation_report_resignation_date') ?></th>
                 <td><?= htmlspecialchars($report['resignation_date'] ?? '—') ?></td>
             </tr>
             <tr>
@@ -80,7 +80,7 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
                 <td><?= nl2br(htmlspecialchars($report['reason'] ?? '—')) ?></td>
             </tr>
             <tr>
-                <th><?= __('resignation_notice') ?></th>
+                <th><?= __('resignation_report_resignation_notice') ?></th>
                 <td><?= nl2br(htmlspecialchars($report['resignation_notice'] ?? '—')) ?></td>
             </tr>
             <tr>
@@ -88,7 +88,7 @@ $base = $BASE_URL . '/admin/stores/' . $storeId . '/reports/resignation';
                 <td><?= nl2br(htmlspecialchars($report['notes'] ?? '—')) ?></td>
             </tr>
             <tr>
-                <th><?= __('person_in_charge') ?></th>
+                <th><?= __('resignation_report_person_in_charge') ?></th>
                 <td><?= htmlspecialchars($report['person_in_charge'] ?? '—') ?></td>
             </tr>
         </table>

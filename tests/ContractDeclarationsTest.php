@@ -54,7 +54,7 @@ final class ContractDeclarationsTest extends TestCase
         foreach ([$row, $store] as $action) {
             $this->assertInstanceOf(Action::class, $action);
             $this->assertSame('resign', $action->key);
-            $this->assertSame('resign', $action->label);
+            $this->assertSame('resignation_report_resign', $action->label);
             $this->assertSame(Action::DANGER, $action->style);
             $this->assertSame('resignation_reports.create', $action->permission);
             $this->assertSame('/admin/stores/5/reports/resignation/create?user_id=3', ($action->url)(['user_id' => 3, 'store_id' => 5]));
@@ -90,8 +90,8 @@ final class ContractDeclarationsTest extends TestCase
     /** Libellés des déclarations, fournis par le bundle. */
     public function testDeclaredLabelsAreTranslatedByTheBundle(): void
     {
-        $keys = ['resignation_report', 'perm_category_resignation_reports', 'resign', 'error_resignation_report_not_found', 'store_picker_choose',
-            'cron_job_resignation_deactivate', 'error_resignation_self', 'error_resignation_manager', 'resignation_deactivation_hint'];
+        $keys = ['resignation_report', 'perm_category_resignation_reports', 'resignation_report_resign', 'resignation_report_error_not_found', 'resignation_report_store_picker_choose',
+            'cron_job_resignation_deactivate', 'resignation_report_error_resignation_self', 'resignation_report_error_resignation_manager', 'resignation_report_resignation_deactivation_hint'];
         foreach (['fr', 'en', 'ja'] as $locale) {
             $lang = json_decode((string) file_get_contents(dirname(__DIR__) . "/lang/{$locale}.json"), true);
             foreach ($keys as $key) {
