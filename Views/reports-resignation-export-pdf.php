@@ -15,7 +15,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<style>
+<style nonce="<?= csp_nonce() ?>">
 <?php
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-brand.css');
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-preview.css');
@@ -28,7 +28,7 @@ echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-export-
 <?php include __DIR__ . '/../../../UI/View/_partials/_pdf-preview-toolbar.php'; ?>
 <div class="pdf-preview-page">
 
-<h1><?= __('resignation_reports') ?></h1>
+<h1><?= __('resignation_report_resignation_reports') ?></h1>
 <div class="subtitle"><?= count($reports) ?> — <?= htmlspecialchars($generated_at) ?></div>
 
 <table>
@@ -36,8 +36,8 @@ echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-export-
         <th><?= __('store') ?></th>
         <th><?= __('employee_number') ?></th>
         <th><?= __('employee_name') ?></th>
-        <th><?= __('resignation_date') ?></th>
-        <th><?= __('person_in_charge') ?></th>
+        <th><?= __('resignation_report_resignation_date') ?></th>
+        <th><?= __('resignation_report_person_in_charge') ?></th>
     </tr>
     <?php foreach ($reports as $r): ?>
     <tr>

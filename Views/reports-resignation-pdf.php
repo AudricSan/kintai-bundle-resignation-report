@@ -14,12 +14,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<style>
+<style nonce="<?= csp_nonce() ?>">
 <?php
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-base.css');
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-brand.css');
 echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-preview.css');
-echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-resignation-report.css');
+echo file_get_contents(bundle_asset_path('resignation-report', 'css/pdf-resignation-report.css') ?? '');
 ?>
 </style>
 </head>
@@ -44,7 +44,7 @@ echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-resigna
         <td><?= htmlspecialchars($report['employee_name'] ?? '—') ?></td>
     </tr>
     <tr>
-        <th><?= __('resignation_date') ?></th>
+        <th><?= __('resignation_report_resignation_date') ?></th>
         <td><?= htmlspecialchars($report['resignation_date'] ?? '—') ?></td>
     </tr>
     <tr>
@@ -52,7 +52,7 @@ echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-resigna
         <td><?= nl2br(htmlspecialchars($report['reason'] ?? '—')) ?></td>
     </tr>
     <tr>
-        <th><?= __('resignation_notice') ?></th>
+        <th><?= __('resignation_report_resignation_notice') ?></th>
         <td><?= nl2br(htmlspecialchars($report['resignation_notice'] ?? '—')) ?></td>
     </tr>
     <tr>
@@ -60,7 +60,7 @@ echo file_get_contents(dirname(__DIR__, 4) . '/public/assets/css/pdf/pdf-resigna
         <td><?= nl2br(htmlspecialchars($report['notes'] ?? '—')) ?></td>
     </tr>
     <tr>
-        <th><?= __('person_in_charge') ?></th>
+        <th><?= __('resignation_report_person_in_charge') ?></th>
         <td><?= htmlspecialchars($report['person_in_charge'] ?? '—') ?></td>
     </tr>
 </table>

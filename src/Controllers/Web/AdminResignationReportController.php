@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\ResignationReport\Controllers\Web;
 
-use kintai\Core\Auth\PermissionService;
-use kintai\Core\Repositories\ResignationReportRepositoryInterface;
-use kintai\Core\Repositories\StoreRepositoryInterface;
-use kintai\Core\Repositories\StoreUserRepositoryInterface;
-use kintai\Core\Repositories\UserRepositoryInterface;
-use kintai\Core\Request;
-use kintai\Core\Response;
-use kintai\Core\Services\AuditLogger;
-use kintai\UI\Controller\Web\HasAdminAccess;
-use kintai\UI\Controller\Web\Staff\HasStaffReportCrud;
-use kintai\UI\ViewRenderer;
+use kintai\Contract\Auth\PermissionService;
+use kintai\Contract\Auth\UserAnonymizer;
+use kintai\Contract\Exceptions\ForbiddenException;
+use kintai\Contract\Exceptions\ValidationException;
+use kintai\Bundles\Installed\ResignationReport\Repositories\ResignationReportRepositoryInterface;
+use kintai\Bundles\Installed\ResignationReport\Services\ResignationDeactivation;
+use kintai\Contract\Data\StoreRepositoryInterface;
+use kintai\Contract\Data\StoreUserRepositoryInterface;
+use kintai\Contract\Data\UserRepositoryInterface;
+use kintai\Contract\Http\Request;
+use kintai\Contract\Http\Response;
+use kintai\Contract\Services\AuditLogger;
+use kintai\Contract\Http\Concerns\HasAdminAccess;
+use kintai\Contract\Http\Concerns\HasStaffReportCrud;
+use kintai\Contract\View\ViewRenderer;
 
 final class AdminResignationReportController
 {
@@ -25,7 +29,7 @@ final class AdminResignationReportController
         'entity'    => 'resignation_report',
         'slug'      => 'resignation',
         'view'      => 'resignation-report::reports-resignation',
-        'not_found' => 'error_resignation_report_not_found',
+        'not_found' => 'resignation_report_error_not_found',
         'fields'    => [
             'employee_number'    => 'str',
             'employee_name'      => 'str',
@@ -45,6 +49,9 @@ final class AdminResignationReportController
         private readonly StoreUserRepositoryInterface $storeUsers,
         private readonly AuditLogger $auditLogger,
         private readonly PermissionService $permissions,
+        private readonly ResignationDeactivation $deactivation,
+        // Résolu par le conteneur (contrat 1.21) ; facultatif pour les tests qui ne suppriment aucun compte.
+        private readonly ?UserAnonymizer $anonymizer = null,
     ) {}
 
     public function allResignationReports(Request $request): Response
@@ -72,7 +79,7 @@ final class AdminResignationReportController
         $reports = $this->resignationReports->findAll($queryStoreIds, $filters);
 
         return Response::html($this->view->render('resignation-report::reports-resignation', [
-            'title'          => __('resignation_reports'),
+            'title'          => __('resignation_report_resignation_reports'),
             'stores'         => $allStores,
             'filter_store_id' => $filterStoreId,
             'filter_year'    => $filterYear,
@@ -84,7 +91,7 @@ final class AdminResignationReportController
 
     public function resignationReports(Request $request): Response
     {
-        return $this->listReports($request, __('resignation_reports'));
+        return $this->listReports($request, __('resignation_report_resignation_reports'));
     }
 
     // -------------------------------------------------------------------------
@@ -203,7 +210,7 @@ final class AdminResignationReportController
         $managers = $this->getManagersForReportForm($storeId, $userId);
 
         return Response::html($this->view->render('resignation-report::reports-resignation-form', [
-            'title'   => __('new_resignation_report') . ' — ' . ($store['name'] ?? ''),
+            'title'   => __('resignation_report_new_resignation_report') . ' — ' . ($store['name'] ?? ''),
             'store'   => $store,
             'users'   => $users,
             'mode'    => 'create',
@@ -219,6 +226,15 @@ final class AdminResignationReportController
         $this->assertStoreAccess($request, $storeId);
 
         $userId = (int) $request->post('user_id', 0);
+        if ($userId > 0) {
+            // La création désactive le compte ciblé : il doit appartenir à CE magasin et ne
+            // pas être un Owner, sinon un gérant pouvait désactiver (puis supprimer) n'importe quel compte.
+            if ($this->storeUsers->findMembership($storeId, $userId) === null) {
+                throw new ValidationException(['user_id' => __('resignation_report_error_resignation_user_not_in_store')]);
+            }
+            $this->assertNotOwnerAccount($request, $userId);
+            $this->assertNotSelfOrOtherManager($request, $storeId, $userId);
+        }
 
         $data = array_merge([
             'store_id' => $storeId,
@@ -229,14 +245,9 @@ final class AdminResignationReportController
 
         $saved = $this->resignationReports->save($data);
 
-        // Désactiver l'employé
-        if ($userId > 0) {
-            $user = $this->users->findById($userId);
-            if ($user !== null) {
-                $user['is_active'] = 0;
-                $this->users->save($user);
-            }
-        }
+        // Compte désactivé à la date de démission (aujourd'hui ou passée : tout de suite ; sinon par la tâche planifiée
+        // resignation-deactivate), pas à la création : l'employé garde son planning pendant son préavis.
+        $this->deactivation->sync($saved);
 
         $this->auditLogger->log($request, 'resignation_report.created', 'resignation_report', (int) ($saved['id'] ?? 0), [
             'store_id' => $storeId,
@@ -256,22 +267,45 @@ final class AdminResignationReportController
         return $this->editReport($request);
     }
 
+    /** Date de démission modifiée : le compte suit (désactivé si elle est atteinte, réactivé si elle est repoussée). */
     public function updateResignationReport(Request $request): Response
     {
-        return $this->updateReport($request);
+        $before = $this->resignationReports->findById((int) $request->param('rid'));
+        $newUserId = (int) $request->post('user_id', 0);
+        if ($newUserId > 0 && $newUserId !== (int) ($before['user_id'] ?? 0)) {
+            $this->assertNotOwnerAccount($request, $newUserId);
+            $this->assertNotSelfOrOtherManager($request, (int) $request->param('id'), $newUserId);
+        }
+
+        $response = $this->updateReport($request);
+
+        $report = $this->resignationReports->findById((int) $request->param('rid'));
+        if ($report === null) {
+            return $response;
+        }
+        // Rapport déjà appliqué rattaché à un autre compte : l'ancien n'a plus de raison d'être désactivé.
+        $oldUserId = (int) ($before['user_id'] ?? 0);
+        if ($oldUserId > 0 && $oldUserId !== (int) ($report['user_id'] ?? 0) && !empty($report['deactivated_at'])) {
+            $old = $this->users->findById($oldUserId);
+            if ($old !== null) {
+                $old['is_active'] = 1;
+                $this->users->save($old);
+            }
+            $report = $this->resignationReports->save(['id' => (int) $report['id'], 'deactivated_at' => null]);
+        }
+        $this->deactivation->sync($report);
+        return $response;
     }
 
     /**
-     * Supprimer un rapport de démission réactive automatiquement l'employé
-     * concerné (storeResignationReport() le désactive à la création) — sinon
-     * il resterait désactivé alors que le rapport qui l'a désactivé n'existe
-     * plus.
+     * Supprimer un rapport de démission déjà appliqué réactive l'employé concerné — sinon il resterait désactivé alors
+     * que le rapport qui l'a désactivé n'existe plus. Un rapport pas encore appliqué (date future) n'a rien désactivé.
      */
     public function deleteResignationReport(Request $request): Response
     {
         [$report] = $this->findReportOrFail($request);
         $userId = (int) ($report['user_id'] ?? 0);
-        if ($userId > 0) {
+        if ($userId > 0 && !empty($report['deactivated_at'])) {
             $user = $this->users->findById($userId);
             if ($user !== null) {
                 $user['is_active'] = 1;
@@ -296,6 +330,10 @@ final class AdminResignationReportController
     {
         [$report, $storeId, $reportId] = $this->findReportOrFail($request);
         $userId = (int) ($report['user_id'] ?? 0);
+        if ($userId > 0) {
+            $this->assertNotOwnerAccount($request, $userId);
+            $this->assertUserOnlyInManagedStores($request, $userId);
+        }
 
         $this->resignationReports->delete($reportId);
         $this->auditLogger->log($request, 'resignation_report.deleted', 'resignation_report', $reportId, [
@@ -303,7 +341,9 @@ final class AdminResignationReportController
         ]);
 
         if ($userId > 0) {
-            $this->users->delete($userId);
+            // Supprimer un compte, c'est l'anonymiser (comme la fiche employé et l'API) : avant, une suppression douce
+            // laissait nom, e-mail, téléphone et adresse en base.
+            ($this->anonymizer ?? throw new \LogicException('UserAnonymizer requis.'))->anonymize($userId);
             $this->auditLogger->log($request, 'user.deleted', 'user', $userId, [
                 'reason'   => 'resignation_report_deleted',
                 'store_id' => $storeId,
@@ -311,6 +351,52 @@ final class AdminResignationReportController
         }
 
         return $this->redirectToList($storeId, 'resignation', 'user_deleted');
+    }
+
+    /** Seul un Owner peut agir sur un compte Owner (même règle que les fiches employés). */
+    private function assertNotOwnerAccount(Request $request, int $userId): void
+    {
+        $callerId = (int) ($request->getAttribute('auth_user')['id'] ?? 0);
+        $owners   = $this->permissions->ownerUserIds();
+        if (in_array($userId, $owners, true) && !in_array($callerId, $owners, true)) {
+            throw new ForbiddenException(__('error_not_store_manager'));
+        }
+    }
+
+    /**
+     * Le rapport désactive le compte : interdit sur soi-même (le gérant se coupait l'accès), et, sauf pour un Owner, sur
+     * un compte qui gère lui-même un magasin (un gérant ne met pas fin à l'accès d'un autre gérant).
+     */
+    private function assertNotSelfOrOtherManager(Request $request, int $storeId, int $userId): void
+    {
+        $callerId = (int) ($request->getAttribute('auth_user')['id'] ?? 0);
+        if ($userId === $callerId) {
+            throw new ForbiddenException(__('resignation_report_error_resignation_self'));
+        }
+        if (in_array($callerId, $this->permissions->ownerUserIds(), true)) {
+            return;
+        }
+        $target = ['id' => $userId];
+        if ($this->permissions->anyGrantedStoreIds($target) !== [] || $this->permissions->hasAnyGlobalPermissionGrant($target)) {
+            throw new ForbiddenException(__('resignation_report_error_resignation_manager'));
+        }
+    }
+
+    /**
+     * Supprimer un compte l'efface de TOUS ses magasins : le gérant doit donc gérer chacun d'eux
+     * (portée illimitée = null, toujours accepté).
+     */
+    private function assertUserOnlyInManagedStores(Request $request, int $userId): void
+    {
+        $managed = $request->getAttribute('managed_store_ids');
+        if ($managed === null) {
+            return;
+        }
+        foreach ($this->storeUsers->findByUser($userId) as $membership) {
+            if (!in_array((int) $membership['store_id'], $managed, true)) {
+                throw new ForbiddenException(__('error_not_store_manager'));
+            }
+        }
     }
 
     public function resignationReportPdf(Request $request): Response
@@ -363,7 +449,7 @@ final class AdminResignationReportController
 
     protected function reportEditTitle(): string
     {
-        return __('edit_resignation_report');
+        return __('resignation_report_edit_resignation_report');
     }
 
     protected function reportEditExtras(int $storeId, array $report): array

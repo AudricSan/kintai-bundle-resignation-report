@@ -1,7 +1,7 @@
 <?php
-use kintai\UI\Components\Button;
-use kintai\UI\Components\Card;
-use kintai\UI\Components\Flash;
+use kintai\Contract\View\Components\Button;
+use kintai\Contract\View\Components\Card;
+use kintai\Contract\View\Components\Flash;
 
 /**
  * @var array  $store
@@ -24,7 +24,7 @@ echo Flash::fromQuery('success', [
 ])->render();
 ?>
 <div class="page-header">
-    <h2 class="page-header__title"><?= $mode === 'edit' ? __('edit_resignation_report') : __('new_resignation_report') ?></h2>
+    <h2 class="page-header__title"><?= $mode === 'edit' ? __('resignation_report_edit_resignation_report') : __('resignation_report_new_resignation_report') ?></h2>
     <div class="page-header__actions">
         <a href="<?= back_url($base) ?>" class="btn btn--ghost">← <?= __('back') ?></a>
     </div>
@@ -37,7 +37,7 @@ echo csrf_field();
 
 echo '<div class="form-group">';
 echo '<label class="form-label" for="f-user_id">' . __('user') . '</label>';
-echo '<select id="f-user_id" name="user_id" class="form-control" onchange="rrFillFromUser(this)">';
+echo '<select id="f-user_id" name="user_id" class="form-control" data-on-change="rrFillFromUser" data-args="[&quot;@this&quot;]">';
 echo '<option value="">— ' . __('select') . ' —</option>';
 $selectedUserId = (int) ($report['user_id'] ?? 0);
 foreach ($users as $u) {
@@ -62,8 +62,9 @@ echo '<input id="f-employee_name" type="text" name="employee_name" class="form-c
 echo '</div>';
 
 echo '<div class="form-group">';
-echo '<label class="form-label" for="f-resignation_date">' . __('resignation_date') . '</label>';
+echo '<label class="form-label" for="f-resignation_date">' . __('resignation_report_resignation_date') . '</label>';
 echo '<input id="f-resignation_date" type="date" name="resignation_date" class="form-control" value="' . htmlspecialchars($report['resignation_date'] ?? '') . '">';
+echo '<p class="form-hint">' . __('resignation_report_resignation_deactivation_hint') . '</p>';
 echo '</div>';
 
 echo '<div class="form-group">';
@@ -72,7 +73,7 @@ echo '<textarea id="f-reason" name="reason" class="form-control" rows="4">' . ht
 echo '</div>';
 
 echo '<div class="form-group">';
-echo '<label class="form-label" for="f-resignation_notice">' . __('resignation_notice') . '</label>';
+echo '<label class="form-label" for="f-resignation_notice">' . __('resignation_report_resignation_notice') . '</label>';
 echo '<textarea id="f-resignation_notice" name="resignation_notice" class="form-control" rows="4">' . htmlspecialchars($report['resignation_notice'] ?? '') . '</textarea>';
 echo '</div>';
 
@@ -82,7 +83,7 @@ echo '<textarea id="f-notes" name="notes" class="form-control" rows="4">' . html
 echo '</div>';
 
 echo '<div class="form-group">';
-echo '<label class="form-label" for="f-person_in_charge">' . __('person_in_charge') . '</label>';
+echo '<label class="form-label" for="f-person_in_charge">' . __('resignation_report_person_in_charge') . '</label>';
 echo '<select id="f-person_in_charge" name="person_in_charge" class="form-control">';
 echo '<option value="">— ' . __('select') . ' —</option>';
 $selectedPic = $report['person_in_charge'] ?? '';
@@ -100,7 +101,7 @@ echo '</div></form>';
 
 echo Card::make()->body(ob_get_clean())->render();
 ?>
-<script>
+<script nonce="<?= function_exists('csp_nonce') ? csp_nonce() : '' ?>">
 function rrFillFromUser(select) {
     var opt = select.options[select.selectedIndex];
     document.getElementById('f-employee_number').value = opt.dataset.number || '';

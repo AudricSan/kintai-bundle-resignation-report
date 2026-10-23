@@ -1,7 +1,7 @@
 <?php
-use kintai\UI\Components\Button;
-use kintai\UI\Components\Flash;
-use kintai\UI\Components\Table;
+use kintai\Contract\View\Components\Button;
+use kintai\Contract\View\Components\Flash;
+use kintai\Contract\View\Components\Table;
 
 /**
  * @var array       $store
@@ -56,13 +56,13 @@ echo Flash::fromQuery('success', [
     'updated'      => __('operation_success'),
     'deleted'      => __('operation_success'),
     'reactivated'  => __('operation_success'),
-    'user_deleted' => __('user_deleted_permanently'),
+    'user_deleted' => __('resignation_report_user_deleted_permanently'),
 ])->render();
 ?>
 
 <div class="page-header">
     <h2 class="page-header__title">
-        <?= __('resignation_reports') ?> <span class="page-count">(<?= count($reports) ?>)</span>
+        <?= __('resignation_report_resignation_reports') ?> <span class="page-count">(<?= count($reports) ?>)</span>
     </h2>
     <div class="page-header__actions">
         <?php if ($allMode):
@@ -78,12 +78,12 @@ echo Flash::fromQuery('success', [
         <?= Button::make('JSON')->ghost()->sm()->link($BASE_URL . '/admin/reports/resignation/export/json' . $exportQueryString)->render() ?>
         <?php endif; ?>
         <?php if ($createBase !== null): ?>
-        <?= Button::make('+ ' . __('new_resignation_report'))->primary()->link($createBase . '/create')->render() ?>
+        <?= Button::make('+ ' . __('resignation_report_new_resignation_report'))->primary()->link($createBase . '/create')->render() ?>
         <?php elseif ($allMode): ?>
         <details class="store-picker">
-            <summary class="btn btn--primary">+ <?= __('new_resignation_report') ?></summary>
+            <summary class="btn btn--primary">+ <?= __('resignation_report_new_resignation_report') ?></summary>
             <div class="store-picker__panel">
-                <div class="store-picker__title"><?= __('store_picker_choose') ?></div>
+                <div class="store-picker__title"><?= __('resignation_report_store_picker_choose') ?></div>
                 <?php foreach ($stores as $s): ?>
                     <a class="store-picker__item" href="<?= htmlspecialchars($BASE_URL . '/admin/stores/' . (int) $s['id'] . '/reports/resignation/create') ?>"><?= htmlspecialchars($s['name'] ?? '') ?></a>
                 <?php endforeach; ?>
@@ -104,7 +104,7 @@ echo Flash::fromQuery('success', [
             <?php if ($allMode): ?>
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-store"><?= __('store') ?></label>
-                <select id="rf-store" name="store_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                <select id="rf-store" name="store_id" class="form-control form-control-sm" data-submit-on-change>
                     <option value="0"><?= __('all_stores') ?></option>
                     <?php foreach ($stores as $s): ?>
                         <option value="<?= (int) $s['id'] ?>" <?= (int) $s['id'] === $filter_store_id ? 'selected' : '' ?>><?= htmlspecialchars($s['name'] ?? '') ?></option>
@@ -115,8 +115,8 @@ echo Flash::fromQuery('success', [
 
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-year"><?= __('year') ?></label>
-                <select id="rf-year" name="year" class="form-control form-control-sm" onchange="this.form.submit()">
-                    <option value=""><?= __('all_years') ?></option>
+                <select id="rf-year" name="year" class="form-control form-control-sm" data-submit-on-change>
+                    <option value=""><?= __('resignation_report_all_years') ?></option>
                     <?php foreach ($years as $y): ?>
                         <option value="<?= $y ?>" <?= (string) $y === $filter_year ? 'selected' : '' ?>><?= $y ?></option>
                     <?php endforeach; ?>
@@ -125,8 +125,8 @@ echo Flash::fromQuery('success', [
 
             <div class="shifts-filters__group">
                 <label class="shifts-filters__label" for="rf-month"><?= __('month') ?></label>
-                <select id="rf-month" name="month" class="form-control form-control-sm" onchange="this.form.submit()">
-                    <option value=""><?= __('all_months') ?></option>
+                <select id="rf-month" name="month" class="form-control form-control-sm" data-submit-on-change>
+                    <option value=""><?= __('resignation_report_all_months') ?></option>
                     <?php foreach ($months as $val => $label): ?>
                         <option value="<?= $val ?>" <?= $val === $filter_month ? 'selected' : '' ?>><?= $label ?></option>
                     <?php endforeach; ?>
@@ -134,7 +134,7 @@ echo Flash::fromQuery('success', [
             </div>
 
             <div class="shifts-filters__group">
-                <label class="shifts-filters__label" for="rf-person"><?= __('person_in_charge') ?></label>
+                <label class="shifts-filters__label" for="rf-person"><?= __('resignation_report_person_in_charge') ?></label>
                 <input type="text" id="rf-person" name="person" class="form-control form-control-sm" value="<?= htmlspecialchars($filter_person) ?>">
             </div>
 
@@ -159,8 +159,8 @@ endif;
 echo $tbl
     ->column(__('employee_number'), fn($r) => htmlspecialchars($r['employee_number'] ?? '—'))
     ->column(__('employee_name'), fn($r) => htmlspecialchars($r['employee_name'] ?? '—'))
-    ->column(__('resignation_date'), fn($r) => htmlspecialchars($r['resignation_date'] ?? '—'))
-    ->column(__('person_in_charge'), fn($r) => htmlspecialchars($r['person_in_charge'] ?? '—'))
+    ->column(__('resignation_report_resignation_date'), fn($r) => htmlspecialchars($r['resignation_date'] ?? '—'))
+    ->column(__('resignation_report_person_in_charge'), fn($r) => htmlspecialchars($r['person_in_charge'] ?? '—'))
     ->column(__('actions'), function($r) use ($BASE_URL) {
         $rid = (int) $r['id'];
         $sid = (int) ($r['store_id'] ?? 0);
@@ -170,13 +170,13 @@ echo $tbl
         $html .= '<a href="' . $baseStore . '/' . $rid . '/edit" class="btn btn--ghost btn--sm">' . __('edit') . '</a>';
         if (!empty($r['user_id'])) {
             $html .= '<form method="POST" action="' . $baseStore . '/' . $rid . '/reactivate" class="form-inline">' . csrf_field()
-                . '<button type="submit" class="btn btn--warning btn--sm" onclick="return confirm(\'' . __('confirm_reactivate') . '\')">' . __('reactivate') . '</button></form>';
+                . '<button type="submit" class="btn btn--warning btn--sm" data-confirm="' . htmlspecialchars(__('resignation_report_confirm_reactivate'), ENT_QUOTES) . '">' . __('resignation_report_reactivate') . '</button></form>';
             $html .= '<button type="button" class="btn btn--danger btn--sm js-rr-delete"'
                 . ' data-reactivate-url="' . htmlspecialchars($baseStore . '/' . $rid . '/delete') . '"'
                 . ' data-delete-url="' . htmlspecialchars($baseStore . '/' . $rid . '/delete-permanently') . '"'
                 . ' data-employee-name="' . htmlspecialchars($r['employee_name'] ?? '') . '">' . __('delete') . '</button>';
         } else {
-            $html .= '<form method="POST" action="' . $baseStore . '/' . $rid . '/delete" class="form-inline" data-confirm="' . htmlspecialchars(__('confirm_delete_resignation_report'), ENT_QUOTES) . '">' . csrf_field()
+            $html .= '<form method="POST" action="' . $baseStore . '/' . $rid . '/delete" class="form-inline" data-confirm="' . htmlspecialchars(__('resignation_report_confirm_delete_resignation_report'), ENT_QUOTES) . '">' . csrf_field()
                 . '<button type="submit" class="btn btn--danger btn--sm">' . __('delete') . '</button></form>';
         }
         $html .= Button::make('PDF')->ghost()->sm()->link($baseStore . '/' . $rid . '/pdf')->attrs(['target' => '_blank'])->render();
@@ -190,20 +190,20 @@ echo $tbl
     <div class="modal__backdrop js-rr-delete-close"></div>
     <div class="modal__dialog">
         <div class="modal__header">
-            <h3 class="modal__title"><?= __('delete_resignation_report_title') ?></h3>
+            <h3 class="modal__title"><?= __('resignation_report_delete_title') ?></h3>
             <button type="button" class="modal__close js-rr-delete-close">✕</button>
         </div>
         <div class="modal__body">
-            <p><?= __('delete_resignation_report_intro') ?> <strong id="rr-delete-employee-name"></strong></p>
+            <p><?= __('resignation_report_delete_intro') ?> <strong id="rr-delete-employee-name"></strong></p>
             <form id="rr-reactivate-form" method="POST" action="">
                 <?= csrf_field() ?>
-                <button type="submit" class="btn btn--warning btn--block"><?= __('reactivate_and_delete_report') ?></button>
-                <p class="form-hint"><?= __('reactivate_and_delete_report_hint') ?></p>
+                <button type="submit" class="btn btn--warning btn--block"><?= __('resignation_report_reactivate_and_delete_report') ?></button>
+                <p class="form-hint"><?= __('resignation_report_reactivate_and_delete_report_hint') ?></p>
             </form>
-            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" onsubmit="return confirm('<?= __('confirm_delete_employee_permanently') ?>')">
+            <form id="rr-delete-permanently-form" method="POST" action="" class="mt-sm" data-confirm="<?= htmlspecialchars(__('resignation_report_confirm_delete_employee_permanently'), ENT_QUOTES) ?>">
                 <?= csrf_field() ?>
-                <button type="submit" class="btn btn--danger btn--block"><?= __('delete_employee_and_report_permanently') ?></button>
-                <p class="form-hint"><?= __('delete_employee_and_report_permanently_hint') ?></p>
+                <button type="submit" class="btn btn--danger btn--block"><?= __('resignation_report_delete_employee_and_report_permanently') ?></button>
+                <p class="form-hint"><?= __('resignation_report_delete_employee_and_report_permanently_hint') ?></p>
             </form>
         </div>
         <div class="modal__footer">
@@ -212,4 +212,6 @@ echo $tbl
     </div>
 </div>
 
-<script src="<?= $BASE_URL ?>/assets/js/modules/resignation-report-delete-modal.js"></script>
+<?php if ($resignationDeleteJs = bundle_asset('resignation-report', 'js/resignation-report-delete-modal.js')): ?>
+<script src="<?= $resignationDeleteJs ?>"></script>
+<?php endif; ?>
